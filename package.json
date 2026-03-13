@@ -1,0 +1,24 @@
+{
+  "name": "back-climate",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ImamAriadi2022/back-climate.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/ImamAriadi2022/back-climate/issues"
+  },
+  "homepage": "https://github.com/ImamAriadi2022/back-climate#readme",
+  "dependencies": {
+    "express": "^5.2.1"
+  }
+}
