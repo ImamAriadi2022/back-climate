@@ -6,11 +6,6 @@ const router = express.Router();
 
 // Legacy route, kept for backward compatibility, behaves as history.
 router.get("/petengoran/topic4", validatePaginationQuery, createTopic4Handler("petengoran", "history"));
-router.get(
-  "/kalimantan/topic4",
-  validatePaginationQuery,
-  createTopic4Handler("kalimantan", "history")
-);
 router.get("/dashboard/topic4", validatePaginationQuery, createTopic4Handler("dashboard", "history"));
 
 router.get(
@@ -19,13 +14,6 @@ router.get(
   createTopic4Handler("petengoran", "history")
 );
 router.get("/petengoran/topic4/latest", createTopic4Handler("petengoran", "latest"));
-
-router.get(
-  "/kalimantan/topic4/history",
-  validatePaginationQuery,
-  createTopic4Handler("kalimantan", "history")
-);
-router.get("/kalimantan/topic4/latest", createTopic4Handler("kalimantan", "latest"));
 
 router.get(
   "/dashboard/topic4/history",

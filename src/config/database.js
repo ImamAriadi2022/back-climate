@@ -21,7 +21,6 @@ const createPool = (database) => {
 
 const pools = {
   petengoran: createPool(env.db.names.petengoran),
-  kalimantan: createPool(env.db.names.kalimantan),
   dashboard: createPool(env.db.names.dashboard),
 };
 

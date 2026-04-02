@@ -1,6 +1,6 @@
 const { ApiError } = require("../utils/apiError");
 
-const allowedSources = new Set(["petengoran", "kalimantan", "dashboard"]);
+const allowedSources = new Set(["petengoran", "dashboard"]);
 
 const parsePositiveInt = (value, fallback) => {
   const parsed = Number(value);
@@ -14,7 +14,7 @@ const parsePositiveInt = (value, fallback) => {
 
 const buildRecord = (source, offset = 0) => {
   const timestamp = new Date(Date.now() - offset * 5 * 60 * 1000).toISOString();
-  const sourceSeed = source === "petengoran" ? 1 : source === "kalimantan" ? 2 : 3;
+  const sourceSeed = source === "petengoran" ? 1 : 2;
 
   return {
     timestamp,
@@ -33,7 +33,7 @@ const buildRecord = (source, offset = 0) => {
 
 const validateSource = (source) => {
   if (!allowedSources.has(source)) {
-    throw new ApiError(400, "Source simulasi tidak valid. Gunakan petengoran, kalimantan, atau dashboard.");
+    throw new ApiError(400, "Source simulasi tidak valid. Gunakan petengoran atau dashboard.");
   }
 };
 

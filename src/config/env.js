@@ -27,7 +27,6 @@ const env = {
     password: process.env.DB_PASSWORD,
     names: {
       petengoran: process.env.DB_NAME,
-      kalimantan: process.env.DB_NAME_KALIMANTAN,
       dashboard: process.env.DB_NAME_DASHBOARD || process.env.DB_NAME,
     },
   },

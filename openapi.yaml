@@ -13,7 +13,6 @@ info:
 
     Mapping URL frontend (contoh):
     - REACT_APP_API_PETENGORAN_GET_TOPIC4 -> /petengoran/topic4
-    - REACT_APP_API_KALIMANTAN_GET_TOPIC4 -> /kalimantan/topic4
     - REACT_APP_API_DASHBOARD_GET_TOPIC4 -> /dashboard/topic4
 
 servers:
@@ -25,8 +24,6 @@ servers:
 tags:
   - name: Petengoran
     description: Data sensor terbaru untuk halaman/section Petengoran.
-  - name: Kalimantan
-    description: Data sensor terbaru untuk halaman/section Kalimantan.
   - name: Dashboard
     description: Data sensor umum untuk ringkasan dashboard.
   - name: System
@@ -151,94 +148,6 @@ paths:
         '500':
           $ref: '#/components/responses/InternalServerError'
 
-  /kalimantan/topic4:
-    get:
-      tags: [Kalimantan]
-      summary: Legacy - Ambil history data topic4 Kalimantan
-      deprecated: true
-      description: |
-        Endpoint lama untuk kompatibilitas frontend existing.
-        Perilaku sama dengan `/kalimantan/topic4/history` dengan pagination.
-      operationId: getKalimantanTopic4Legacy
-      parameters:
-        - $ref: '#/components/parameters/PaginationLimit'
-        - $ref: '#/components/parameters/PaginationOffset'
-      responses:
-        '200':
-          description: Berhasil mengambil data sensor Kalimantan
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ResultWrapper'
-              examples:
-                success:
-                  summary: Response sukses
-                  value:
-                    result:
-                      - timestamp: "28-03-26 10:30:00"
-                        humidity: 82.2
-                        temperature: 31.2
-                        AirPressure: 1008.7
-                        windSpeed: 2.3
-                        rainfall: 0
-                        angle: 110
-                        suhuAir: 29.1
-                        irradiation: 580.0
-                        bmpTemperature: 31.0
-        '400':
-          $ref: '#/components/responses/BadRequestError'
-        '429':
-          $ref: '#/components/responses/TooManyRequestsError'
-        '503':
-          $ref: '#/components/responses/ServiceUnavailableError'
-        '500':
-          $ref: '#/components/responses/InternalServerError'
-
-  /kalimantan/topic4/history:
-    get:
-      tags: [Kalimantan]
-      summary: Ambil seluruh history data topic4 Kalimantan
-      description: Mengembalikan history data sensor Kalimantan dengan pagination, diurutkan dari terbaru ke terlama.
-      operationId: getKalimantanTopic4History
-      parameters:
-        - $ref: '#/components/parameters/PaginationLimit'
-        - $ref: '#/components/parameters/PaginationOffset'
-      responses:
-        '200':
-          description: Berhasil mengambil history data Kalimantan
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ResultWrapper'
-        '400':
-          $ref: '#/components/responses/BadRequestError'
-        '429':
-          $ref: '#/components/responses/TooManyRequestsError'
-        '503':
-          $ref: '#/components/responses/ServiceUnavailableError'
-        '500':
-          $ref: '#/components/responses/InternalServerError'
-
-  /kalimantan/topic4/latest:
-    get:
-      tags: [Kalimantan]
-      summary: Ambil data terbaru topic4 Kalimantan
-      description: Mengembalikan 1 record data sensor paling baru dari Kalimantan.
-      operationId: getKalimantanTopic4Latest
-      responses:
-        '200':
-          description: Berhasil mengambil data terbaru Kalimantan
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ResultWrapper'
-        '429':
-          $ref: '#/components/responses/TooManyRequestsError'
-        '503':
-          $ref: '#/components/responses/ServiceUnavailableError'
-        '500':
-          $ref: '#/components/responses/InternalServerError'
-
   /dashboard/topic4:
     get:
       tags: [Dashboard]
@@ -342,7 +251,6 @@ paths:
                     message: ok
                     databases:
                       petengoran: ok
-                      kalimantan: ok
                       dashboard: ok
         '503':
           description: Service degraded (minimal satu database error)
@@ -355,8 +263,7 @@ paths:
                   value:
                     message: degraded
                     databases:
-                      petengoran: ok
-                      kalimantan: error
+                      petengoran: error
                       dashboard: ok
 
   /simulate/{source}/topic4/latest:
@@ -516,7 +423,7 @@ components:
           enum: [simulation]
         source:
           type: string
-          enum: [petengoran, kalimantan, dashboard]
+          enum: [petengoran, dashboard]
         type:
           type: string
           enum: [latest, history]
@@ -591,7 +498,7 @@ components:
       description: Sumber data simulasi.
       schema:
         type: string
-        enum: [petengoran, kalimantan, dashboard]
+        enum: [petengoran, dashboard]
     SimulationLimit:
       name: limit
       in: query

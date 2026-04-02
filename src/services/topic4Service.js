@@ -13,7 +13,6 @@ const getTableBySource = (source) => {
   const fallback = process.env.TOPIC4_TABLE || "topic4";
   const bySource = {
     petengoran: process.env.TOPIC4_TABLE_PETENGORAN,
-    kalimantan: process.env.TOPIC4_TABLE_KALIMANTAN,
     dashboard: process.env.TOPIC4_TABLE_DASHBOARD,
   };
 
