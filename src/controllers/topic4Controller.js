@@ -1,11 +1,14 @@
 const { getPoolBySource } = require("../config/database");
-const { getTopic4 } = require("../services/topic4Service");
+const { getTopic4History, getTopic4Latest } = require("../services/topic4Service");
 
-const createTopic4Handler = (source) => {
+const createTopic4Handler = (source, mode = "history") => {
   return async (req, res, next) => {
     try {
       const pool = getPoolBySource(source);
-      const rows = await getTopic4(pool, req.pagination);
+      const rows =
+        mode === "latest"
+          ? await getTopic4Latest(pool, source)
+          : await getTopic4History(pool, source);
 
       res.status(200).json({ result: rows });
     } catch (error) {

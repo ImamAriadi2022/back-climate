@@ -1,4 +1,3 @@
-const { env } = require("../config/env");
 const { ApiError } = require("../utils/apiError");
 
 const assertSafeIdentifier = (identifier) => {
@@ -9,21 +8,65 @@ const assertSafeIdentifier = (identifier) => {
   return identifier;
 };
 
-const getTopic4 = async (pool, pagination) => {
+const getTableBySource = (source) => {
+  const fallback = process.env.TOPIC4_TABLE || "topic4";
+  const bySource = {
+    petengoran: process.env.TOPIC4_TABLE_PETENGORAN,
+    kalimantan: process.env.TOPIC4_TABLE_KALIMANTAN,
+    dashboard: process.env.TOPIC4_TABLE_DASHBOARD,
+  };
+
+  return assertSafeIdentifier(bySource[source] || fallback);
+};
+
+const mapPostgresError = (error, tableName) => {
+  if (error && error.code === "42P01") {
+    throw new ApiError(
+      500,
+      `Tabel '${tableName}' tidak ditemukan. Periksa konfigurasi TOPIC4_TABLE atau TOPIC4_TABLE_<SUMBER>.`
+    );
+  }
+
+  throw error;
+};
+
+const getTopic4History = async (pool, source) => {
   if (!pool) {
     throw new ApiError(500, "Database belum dikonfigurasi untuk endpoint ini.");
   }
 
-  const limit = pagination?.limit ?? env.topic4.defaultLimit;
-  const offset = pagination?.offset ?? env.topic4.defaultOffset;
-  const tableName = assertSafeIdentifier(env.topic4.table);
+  const tableName = getTableBySource(source);
 
-  const query = `SELECT * FROM ${tableName} ORDER BY timestamp DESC LIMIT $1 OFFSET $2`;
-  const { rows } = await pool.query(query, [limit, offset]);
+  let rows;
+  try {
+    const result = await pool.query(`SELECT * FROM ${tableName} ORDER BY timestamp DESC`);
+    rows = result.rows;
+  } catch (error) {
+    mapPostgresError(error, tableName);
+  }
+
+  return Array.isArray(rows) ? rows : [];
+};
+
+const getTopic4Latest = async (pool, source) => {
+  if (!pool) {
+    throw new ApiError(500, "Database belum dikonfigurasi untuk endpoint ini.");
+  }
+
+  const tableName = getTableBySource(source);
+
+  let rows;
+  try {
+    const result = await pool.query(`SELECT * FROM ${tableName} ORDER BY timestamp DESC LIMIT 1`);
+    rows = result.rows;
+  } catch (error) {
+    mapPostgresError(error, tableName);
+  }
 
   return Array.isArray(rows) ? rows : [];
 };
 
 module.exports = {
-  getTopic4,
+  getTopic4History,
+  getTopic4Latest,
 };

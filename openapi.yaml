@@ -1,18 +1,20 @@
 openapi: 3.1.0
 info:
-  title: IoT Fake API - Frontend Required Endpoints
-  version: 1.1.0
+  title: Back Climate API - Frontend Friendly Docs
+  version: 1.3.0
   description: |
-    OpenAPI contract untuk endpoint yang dibutuhkan frontend pada project iot-fakeapi.
+    Dokumentasi API untuk kebutuhan frontend Back Climate.
 
-    Catatan:
-    - Frontend membaca URL dari environment variable:
-      - REACT_APP_API_PETENGORAN_GET_TOPIC4
-      - REACT_APP_API_KALIMANTAN_GET_TOPIC4
-      - REACT_APP_API_DASHBOARD_GET_TOPIC4
-    - Standard response endpoint topic4: object dengan properti `result`.
-    - Endpoint topic4 mendukung pagination query `limit` dan `offset`.
-    - Dokumen ini juga mencakup skenario hardening response (400, 429, 503).
+    Ringkasan cepat:
+    - Semua endpoint topic4 menggunakan response yang konsisten: `{ result: SensorRecord[] }`.
+    - Endpoint `.../topic4/latest` mengembalikan data terbaru (1 record).
+    - Endpoint `.../topic4/history` mengembalikan seluruh history data.
+    - Jika request terlalu banyak, API mengembalikan 429.
+
+    Mapping URL frontend (contoh):
+    - REACT_APP_API_PETENGORAN_GET_TOPIC4 -> /petengoran/topic4
+    - REACT_APP_API_KALIMANTAN_GET_TOPIC4 -> /kalimantan/topic4
+    - REACT_APP_API_DASHBOARD_GET_TOPIC4 -> /dashboard/topic4
 
 servers:
   - url: https://api.example.com
@@ -20,30 +22,34 @@ servers:
 
 tags:
   - name: Petengoran
+    description: Data sensor terbaru untuk halaman/section Petengoran.
   - name: Kalimantan
+    description: Data sensor terbaru untuk halaman/section Kalimantan.
   - name: Dashboard
+    description: Data sensor umum untuk ringkasan dashboard.
   - name: System
+    description: Endpoint utilitas untuk memantau status layanan.
 
 paths:
   /petengoran/topic4:
     get:
       tags: [Petengoran]
-      summary: Get latest Petengoran data
-      description: Endpoint data sensor untuk halaman dashboard/petengoran.
-      operationId: getPetengoranTopic4
-      parameters:
-        - $ref: '#/components/parameters/PaginationLimit'
-        - $ref: '#/components/parameters/PaginationOffset'
+      summary: Legacy - Ambil history data topic4 Petengoran
+      deprecated: true
+      description: |
+        Endpoint lama untuk kompatibilitas frontend existing.
+        Perilaku sama dengan `/petengoran/topic4/history`.
+      operationId: getPetengoranTopic4Legacy
       responses:
         '200':
-          description: Successful response
+          description: Berhasil mengambil data sensor Petengoran
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ResultWrapper'
               examples:
-                wrappedResponse:
-                  summary: Wrapper result
+                fullHistory:
+                  summary: History data Petengoran
                   value:
                     result:
                       - timestamp: "28-03-26 10:30:00"
@@ -56,8 +62,74 @@ paths:
                         suhuAir: 28.4
                         irradiation: 650.2
                         bmpTemperature: 30.0
-        '400':
-          $ref: '#/components/responses/BadRequestError'
+        '429':
+          $ref: '#/components/responses/TooManyRequestsError'
+        '503':
+          $ref: '#/components/responses/ServiceUnavailableError'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /petengoran/topic4/history:
+    get:
+      tags: [Petengoran]
+      summary: Ambil seluruh history data topic4 Petengoran
+      description: Mengembalikan semua data sensor Petengoran, diurutkan dari terbaru ke terlama.
+      operationId: getPetengoranTopic4History
+      responses:
+        '200':
+          description: Berhasil mengambil history data sensor Petengoran
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResultWrapper'
+              examples:
+                history:
+                  summary: Seluruh history data
+                  value:
+                    result:
+                      - timestamp: "28-03-26 10:30:00"
+                        humidity: 78.3
+                        temperature: 30.1
+                        AirPressure: 1009.8
+                        windSpeed: 4.2
+                        rainfall: 0
+                      - timestamp: "28-03-26 10:25:00"
+                        humidity: 79.1
+                        temperature: 29.9
+                        AirPressure: 1010.1
+                        windSpeed: 4.0
+                        rainfall: 0
+        '429':
+          $ref: '#/components/responses/TooManyRequestsError'
+        '503':
+          $ref: '#/components/responses/ServiceUnavailableError'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /petengoran/topic4/latest:
+    get:
+      tags: [Petengoran]
+      summary: Ambil data terbaru topic4 Petengoran
+      description: Mengembalikan 1 record data sensor paling baru dari Petengoran.
+      operationId: getPetengoranTopic4Latest
+      responses:
+        '200':
+          description: Berhasil mengambil data terbaru Petengoran
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResultWrapper'
+              examples:
+                latest:
+                  summary: Satu record terbaru
+                  value:
+                    result:
+                      - timestamp: "28-03-26 10:30:00"
+                        humidity: 78.3
+                        temperature: 30.1
+                        AirPressure: 1009.8
+                        windSpeed: 4.2
+                        rainfall: 0
         '429':
           $ref: '#/components/responses/TooManyRequestsError'
         '503':
@@ -68,21 +140,74 @@ paths:
   /kalimantan/topic4:
     get:
       tags: [Kalimantan]
-      summary: Get latest Kalimantan data
-      description: Endpoint data sensor untuk halaman Kalimantan.
-      operationId: getKalimantanTopic4
-      parameters:
-        - $ref: '#/components/parameters/PaginationLimit'
-        - $ref: '#/components/parameters/PaginationOffset'
+      summary: Legacy - Ambil history data topic4 Kalimantan
+      deprecated: true
+      description: |
+        Endpoint lama untuk kompatibilitas frontend existing.
+        Perilaku sama dengan `/kalimantan/topic4/history`.
+      operationId: getKalimantanTopic4Legacy
       responses:
         '200':
-          description: Successful response
+          description: Berhasil mengambil data sensor Kalimantan
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ResultWrapper'
-        '400':
-          $ref: '#/components/responses/BadRequestError'
+              examples:
+                success:
+                  summary: Response sukses
+                  value:
+                    result:
+                      - timestamp: "28-03-26 10:30:00"
+                        humidity: 82.2
+                        temperature: 31.2
+                        AirPressure: 1008.7
+                        windSpeed: 2.3
+                        rainfall: 0
+                        angle: 110
+                        suhuAir: 29.1
+                        irradiation: 580.0
+                        bmpTemperature: 31.0
+        '429':
+          $ref: '#/components/responses/TooManyRequestsError'
+        '503':
+          $ref: '#/components/responses/ServiceUnavailableError'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /kalimantan/topic4/history:
+    get:
+      tags: [Kalimantan]
+      summary: Ambil seluruh history data topic4 Kalimantan
+      description: Mengembalikan semua data sensor Kalimantan, diurutkan dari terbaru ke terlama.
+      operationId: getKalimantanTopic4History
+      responses:
+        '200':
+          description: Berhasil mengambil history data Kalimantan
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResultWrapper'
+        '429':
+          $ref: '#/components/responses/TooManyRequestsError'
+        '503':
+          $ref: '#/components/responses/ServiceUnavailableError'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /kalimantan/topic4/latest:
+    get:
+      tags: [Kalimantan]
+      summary: Ambil data terbaru topic4 Kalimantan
+      description: Mengembalikan 1 record data sensor paling baru dari Kalimantan.
+      operationId: getKalimantanTopic4Latest
+      responses:
+        '200':
+          description: Berhasil mengambil data terbaru Kalimantan
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResultWrapper'
         '429':
           $ref: '#/components/responses/TooManyRequestsError'
         '503':
@@ -93,21 +218,70 @@ paths:
   /dashboard/topic4:
     get:
       tags: [Dashboard]
-      summary: Get latest dashboard data (optional)
-      description: Endpoint opsional jika dashboard menggunakan sumber data terpisah.
-      operationId: getDashboardTopic4
-      parameters:
-        - $ref: '#/components/parameters/PaginationLimit'
-        - $ref: '#/components/parameters/PaginationOffset'
+      summary: Legacy - Ambil history data topic4 Dashboard
+      deprecated: true
+      description: |
+        Endpoint lama untuk kompatibilitas frontend existing.
+        Perilaku sama dengan `/dashboard/topic4/history`.
+      operationId: getDashboardTopic4Legacy
       responses:
         '200':
-          description: Successful response
+          description: Berhasil mengambil data dashboard topic4
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ResultWrapper'
-        '400':
-          $ref: '#/components/responses/BadRequestError'
+              examples:
+                success:
+                  summary: Response sukses
+                  value:
+                    result:
+                      - timestamp: "28-03-26 10:30:00"
+                        humidity: 78.3
+                        temperature: 30.1
+                        AirPressure: 1009.8
+                        windSpeed: 4.2
+                        rainfall: 0
+        '429':
+          $ref: '#/components/responses/TooManyRequestsError'
+        '503':
+          $ref: '#/components/responses/ServiceUnavailableError'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /dashboard/topic4/history:
+    get:
+      tags: [Dashboard]
+      summary: Ambil seluruh history data topic4 Dashboard
+      description: Mengembalikan semua data sensor Dashboard, diurutkan dari terbaru ke terlama.
+      operationId: getDashboardTopic4History
+      responses:
+        '200':
+          description: Berhasil mengambil history data Dashboard
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResultWrapper'
+        '429':
+          $ref: '#/components/responses/TooManyRequestsError'
+        '503':
+          $ref: '#/components/responses/ServiceUnavailableError'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /dashboard/topic4/latest:
+    get:
+      tags: [Dashboard]
+      summary: Ambil data terbaru topic4 Dashboard
+      description: Mengembalikan 1 record data sensor paling baru dari Dashboard.
+      operationId: getDashboardTopic4Latest
+      responses:
+        '200':
+          description: Berhasil mengambil data terbaru Dashboard
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResultWrapper'
         '429':
           $ref: '#/components/responses/TooManyRequestsError'
         '503':
@@ -118,7 +292,8 @@ paths:
   /health:
     get:
       tags: [System]
-      summary: Service and database health status
+      summary: Cek status service dan database
+      description: Endpoint untuk monitoring internal. Bukan untuk konsumsi data frontend utama.
       operationId: getHealth
       responses:
         '200':
@@ -155,10 +330,11 @@ components:
     SensorRecord:
       type: object
       additionalProperties: true
+      description: Satu record data sensor topic4.
       properties:
         timestamp:
           type: string
-          description: Timestamp sensor. Disarankan konsisten dalam format yang mudah diparse JavaScript Date.
+          description: Timestamp data sensor (format mengikuti data sumber saat ini).
           examples: ["28-03-26 10:30:00", "2026-03-28T10:30:00Z"]
         humidity:
           type: number
@@ -201,6 +377,7 @@ components:
     ResultWrapper:
       type: object
       required: [result]
+      description: Format response standar endpoint topic4.
       properties:
         result:
           type: array
@@ -210,6 +387,7 @@ components:
     ErrorResponse:
       type: object
       required: [message]
+      description: Format error standar API.
       properties:
         message:
           type: string
@@ -228,47 +406,7 @@ components:
             type: string
             enum: [ok, error, not-configured]
 
-  parameters:
-    PaginationLimit:
-      name: limit
-      in: query
-      required: false
-      description: Jumlah maksimum data yang dikembalikan.
-      schema:
-        type: integer
-        minimum: 1
-        maximum: 500
-        default: 100
-      examples:
-        default:
-          value: 100
-    PaginationOffset:
-      name: offset
-      in: query
-      required: false
-      description: Posisi awal data untuk pagination.
-      schema:
-        type: integer
-        minimum: 0
-        default: 0
-      examples:
-        default:
-          value: 0
-
   responses:
-    BadRequestError:
-      description: Bad request (validasi query gagal)
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ErrorResponse'
-          examples:
-            invalidLimit:
-              value:
-                message: Query parameter 'limit' harus bilangan bulat positif.
-            invalidOffset:
-              value:
-                message: Query parameter 'offset' harus bilangan bulat nol atau lebih.
     TooManyRequestsError:
       description: Request melebihi rate limit
       content:
@@ -288,7 +426,7 @@ components:
           examples:
             degradedService:
               value:
-                message: Service Unavailable
+                message: Service sementara tidak tersedia.
     InternalServerError:
       description: Internal server error
       content:

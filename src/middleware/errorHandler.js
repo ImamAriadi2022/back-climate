@@ -6,8 +6,7 @@ const notFoundHandler = (_req, _res, next) => {
 
 const errorHandler = (error, _req, res, _next) => {
   const statusCode = error instanceof ApiError ? error.statusCode : 500;
-  const message =
-    statusCode >= 500 ? "Internal Server Error" : error.message || "Bad Request";
+  const message = error.message || (statusCode >= 500 ? "Internal Server Error" : "Bad Request");
 
   res.status(statusCode).json({ message });
 };

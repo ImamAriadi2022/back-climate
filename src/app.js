@@ -9,6 +9,17 @@ const { loadOpenApiDocument } = require("./config/openapi");
 
 const app = express();
 const openApiDocument = loadOpenApiDocument();
+const swaggerUiOptions = {
+  customSiteTitle: "Back Climate API Docs",
+  explorer: true,
+  swaggerOptions: {
+    docExpansion: "list",
+    defaultModelsExpandDepth: 1,
+    displayRequestDuration: true,
+    tryItOutEnabled: true,
+    filter: true,
+  },
+};
 
 app.use(cors());
 app.use(express.json());
@@ -18,7 +29,7 @@ app.get("/docs.json", (_req, res) => {
   res.status(200).json(openApiDocument);
 });
 
-app.use("/docs", swaggerUi.serve, swaggerUi.setup(openApiDocument));
+app.use("/docs", swaggerUi.serve, swaggerUi.setup(openApiDocument, swaggerUiOptions));
 
 app.use(healthRouter);
 app.use(topic4Router);
