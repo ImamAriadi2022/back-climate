@@ -1,14 +1,14 @@
 openapi: 3.1.0
 info:
   title: Back Climate API - Frontend Friendly Docs
-  version: 1.3.0
+  version: 1.5.0
   description: |
     Dokumentasi API untuk kebutuhan frontend Back Climate.
 
     Ringkasan cepat:
     - Semua endpoint topic4 menggunakan response yang konsisten: `{ result: SensorRecord[] }`.
     - Endpoint `.../topic4/latest` mengembalikan data terbaru (1 record).
-    - Endpoint `.../topic4/history` mengembalikan seluruh history data.
+    - Endpoint `.../topic4/history` mengembalikan history data terurut dengan pagination (`limit`/`offset`).
     - Jika request terlalu banyak, API mengembalikan 429.
 
     Mapping URL frontend (contoh):
@@ -17,6 +17,8 @@ info:
     - REACT_APP_API_DASHBOARD_GET_TOPIC4 -> /dashboard/topic4
 
 servers:
+  - url: http://localhost:3000
+    description: Local development server (recommended for Swagger Try it out)
   - url: https://api.example.com
     description: Example production server
 
@@ -29,6 +31,8 @@ tags:
     description: Data sensor umum untuk ringkasan dashboard.
   - name: System
     description: Endpoint utilitas untuk memantau status layanan.
+  - name: Simulation
+    description: Endpoint simulasi data untuk frontend testing tanpa koneksi database.
 
 paths:
   /petengoran/topic4:
@@ -38,8 +42,11 @@ paths:
       deprecated: true
       description: |
         Endpoint lama untuk kompatibilitas frontend existing.
-        Perilaku sama dengan `/petengoran/topic4/history`.
+        Perilaku sama dengan `/petengoran/topic4/history` dengan pagination.
       operationId: getPetengoranTopic4Legacy
+      parameters:
+        - $ref: '#/components/parameters/PaginationLimit'
+        - $ref: '#/components/parameters/PaginationOffset'
       responses:
         '200':
           description: Berhasil mengambil data sensor Petengoran
@@ -62,6 +69,8 @@ paths:
                         suhuAir: 28.4
                         irradiation: 650.2
                         bmpTemperature: 30.0
+        '400':
+          $ref: '#/components/responses/BadRequestError'
         '429':
           $ref: '#/components/responses/TooManyRequestsError'
         '503':
@@ -73,8 +82,11 @@ paths:
     get:
       tags: [Petengoran]
       summary: Ambil seluruh history data topic4 Petengoran
-      description: Mengembalikan semua data sensor Petengoran, diurutkan dari terbaru ke terlama.
+      description: Mengembalikan history data sensor Petengoran dengan pagination, diurutkan dari terbaru ke terlama.
       operationId: getPetengoranTopic4History
+      parameters:
+        - $ref: '#/components/parameters/PaginationLimit'
+        - $ref: '#/components/parameters/PaginationOffset'
       responses:
         '200':
           description: Berhasil mengambil history data sensor Petengoran
@@ -83,8 +95,8 @@ paths:
               schema:
                 $ref: '#/components/schemas/ResultWrapper'
               examples:
-                history:
-                  summary: Seluruh history data
+                historyPage:
+                  summary: History data halaman pertama
                   value:
                     result:
                       - timestamp: "28-03-26 10:30:00"
@@ -99,6 +111,8 @@ paths:
                         AirPressure: 1010.1
                         windSpeed: 4.0
                         rainfall: 0
+        '400':
+          $ref: '#/components/responses/BadRequestError'
         '429':
           $ref: '#/components/responses/TooManyRequestsError'
         '503':
@@ -144,8 +158,11 @@ paths:
       deprecated: true
       description: |
         Endpoint lama untuk kompatibilitas frontend existing.
-        Perilaku sama dengan `/kalimantan/topic4/history`.
+        Perilaku sama dengan `/kalimantan/topic4/history` dengan pagination.
       operationId: getKalimantanTopic4Legacy
+      parameters:
+        - $ref: '#/components/parameters/PaginationLimit'
+        - $ref: '#/components/parameters/PaginationOffset'
       responses:
         '200':
           description: Berhasil mengambil data sensor Kalimantan
@@ -168,6 +185,8 @@ paths:
                         suhuAir: 29.1
                         irradiation: 580.0
                         bmpTemperature: 31.0
+        '400':
+          $ref: '#/components/responses/BadRequestError'
         '429':
           $ref: '#/components/responses/TooManyRequestsError'
         '503':
@@ -179,8 +198,11 @@ paths:
     get:
       tags: [Kalimantan]
       summary: Ambil seluruh history data topic4 Kalimantan
-      description: Mengembalikan semua data sensor Kalimantan, diurutkan dari terbaru ke terlama.
+      description: Mengembalikan history data sensor Kalimantan dengan pagination, diurutkan dari terbaru ke terlama.
       operationId: getKalimantanTopic4History
+      parameters:
+        - $ref: '#/components/parameters/PaginationLimit'
+        - $ref: '#/components/parameters/PaginationOffset'
       responses:
         '200':
           description: Berhasil mengambil history data Kalimantan
@@ -188,6 +210,8 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ResultWrapper'
+        '400':
+          $ref: '#/components/responses/BadRequestError'
         '429':
           $ref: '#/components/responses/TooManyRequestsError'
         '503':
@@ -222,8 +246,11 @@ paths:
       deprecated: true
       description: |
         Endpoint lama untuk kompatibilitas frontend existing.
-        Perilaku sama dengan `/dashboard/topic4/history`.
+        Perilaku sama dengan `/dashboard/topic4/history` dengan pagination.
       operationId: getDashboardTopic4Legacy
+      parameters:
+        - $ref: '#/components/parameters/PaginationLimit'
+        - $ref: '#/components/parameters/PaginationOffset'
       responses:
         '200':
           description: Berhasil mengambil data dashboard topic4
@@ -242,6 +269,8 @@ paths:
                         AirPressure: 1009.8
                         windSpeed: 4.2
                         rainfall: 0
+        '400':
+          $ref: '#/components/responses/BadRequestError'
         '429':
           $ref: '#/components/responses/TooManyRequestsError'
         '503':
@@ -253,8 +282,11 @@ paths:
     get:
       tags: [Dashboard]
       summary: Ambil seluruh history data topic4 Dashboard
-      description: Mengembalikan semua data sensor Dashboard, diurutkan dari terbaru ke terlama.
+      description: Mengembalikan history data sensor Dashboard dengan pagination, diurutkan dari terbaru ke terlama.
       operationId: getDashboardTopic4History
+      parameters:
+        - $ref: '#/components/parameters/PaginationLimit'
+        - $ref: '#/components/parameters/PaginationOffset'
       responses:
         '200':
           description: Berhasil mengambil history data Dashboard
@@ -262,6 +294,8 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ResultWrapper'
+        '400':
+          $ref: '#/components/responses/BadRequestError'
         '429':
           $ref: '#/components/responses/TooManyRequestsError'
         '503':
@@ -325,6 +359,95 @@ paths:
                       kalimantan: error
                       dashboard: ok
 
+  /simulate/{source}/topic4/latest:
+    get:
+      tags: [Simulation]
+      summary: Simulasi data terbaru topic4
+      description: Menghasilkan 1 data terbaru simulasi untuk source tertentu tanpa query ke database.
+      operationId: getSimulationTopic4Latest
+      parameters:
+        - $ref: '#/components/parameters/SimulationSource'
+      responses:
+        '200':
+          description: Simulasi latest berhasil
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SimulationResultWrapper'
+              examples:
+                simulatedLatest:
+                  value:
+                    result:
+                      - timestamp: "2026-04-02T12:00:00.000Z"
+                        humidity: 71.2
+                        temperature: 29.1
+                        AirPressure: 1009.1
+                        windSpeed: 2.2
+                        rainfall: 0
+                        angle: 91
+                        suhuAir: 28.2
+                        irradiation: 431
+                        bmpTemperature: 28.1
+                        direction: Simulated
+                    meta:
+                      mode: simulation
+                      source: petengoran
+                      type: latest
+        '400':
+          $ref: '#/components/responses/BadRequestError'
+
+  /simulate/{source}/topic4/history:
+    get:
+      tags: [Simulation]
+      summary: Simulasi history data topic4
+      description: Menghasilkan data history simulasi tanpa query ke database. Cocok untuk uji tabel/chart frontend.
+      operationId: getSimulationTopic4History
+      parameters:
+        - $ref: '#/components/parameters/SimulationSource'
+        - $ref: '#/components/parameters/SimulationLimit'
+        - $ref: '#/components/parameters/SimulationOffset'
+      responses:
+        '200':
+          description: Simulasi history berhasil
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SimulationResultWrapper'
+              examples:
+                simulatedHistory:
+                  value:
+                    result:
+                      - timestamp: "2026-04-02T12:00:00.000Z"
+                        humidity: 71.2
+                        temperature: 29.1
+                        AirPressure: 1009.1
+                        windSpeed: 2.2
+                        rainfall: 0
+                        angle: 91
+                        suhuAir: 28.2
+                        irradiation: 431
+                        bmpTemperature: 28.1
+                        direction: Simulated
+                      - timestamp: "2026-04-02T11:55:00.000Z"
+                        humidity: 71.3
+                        temperature: 29.2
+                        AirPressure: 1009.2
+                        windSpeed: 2.4
+                        rainfall: 0.1
+                        angle: 92
+                        suhuAir: 28.3
+                        irradiation: 432
+                        bmpTemperature: 28.2
+                        direction: Simulated
+                    meta:
+                      mode: simulation
+                      source: petengoran
+                      type: history
+                      limit: 2
+                      offset: 0
+        '400':
+          $ref: '#/components/responses/BadRequestError'
+
 components:
   schemas:
     SensorRecord:
@@ -384,6 +507,35 @@ components:
           items:
             $ref: '#/components/schemas/SensorRecord'
 
+    SimulationMeta:
+      type: object
+      required: [mode, source, type]
+      properties:
+        mode:
+          type: string
+          enum: [simulation]
+        source:
+          type: string
+          enum: [petengoran, kalimantan, dashboard]
+        type:
+          type: string
+          enum: [latest, history]
+        limit:
+          type: integer
+        offset:
+          type: integer
+
+    SimulationResultWrapper:
+      type: object
+      required: [result, meta]
+      properties:
+        result:
+          type: array
+          items:
+            $ref: '#/components/schemas/SensorRecord'
+        meta:
+          $ref: '#/components/schemas/SimulationMeta'
+
     ErrorResponse:
       type: object
       required: [message]
@@ -406,7 +558,74 @@ components:
             type: string
             enum: [ok, error, not-configured]
 
+  parameters:
+    PaginationLimit:
+      name: limit
+      in: query
+      required: false
+      description: Jumlah maksimum record history yang dikembalikan.
+      schema:
+        type: integer
+        minimum: 1
+        maximum: 500
+        default: 100
+      examples:
+        default:
+          value: 100
+    PaginationOffset:
+      name: offset
+      in: query
+      required: false
+      description: Posisi awal data history.
+      schema:
+        type: integer
+        minimum: 0
+        default: 0
+      examples:
+        default:
+          value: 0
+    SimulationSource:
+      name: source
+      in: path
+      required: true
+      description: Sumber data simulasi.
+      schema:
+        type: string
+        enum: [petengoran, kalimantan, dashboard]
+    SimulationLimit:
+      name: limit
+      in: query
+      required: false
+      description: Jumlah data simulasi history (default 20, max 200).
+      schema:
+        type: integer
+        minimum: 1
+        maximum: 200
+        default: 20
+    SimulationOffset:
+      name: offset
+      in: query
+      required: false
+      description: Posisi awal data simulasi history.
+      schema:
+        type: integer
+        minimum: 0
+        default: 0
+
   responses:
+    BadRequestError:
+      description: Parameter query tidak valid (limit/offset)
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          examples:
+            invalidLimit:
+              value:
+                message: Query parameter 'limit' harus bilangan bulat positif.
+            invalidOffset:
+              value:
+                message: Query parameter 'offset' harus bilangan bulat nol atau lebih.
     TooManyRequestsError:
       description: Request melebihi rate limit
       content:

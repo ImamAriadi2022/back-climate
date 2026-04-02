@@ -8,7 +8,7 @@ const createTopic4Handler = (source, mode = "history") => {
       const rows =
         mode === "latest"
           ? await getTopic4Latest(pool, source)
-          : await getTopic4History(pool, source);
+          : await getTopic4History(pool, source, req.pagination);
 
       res.status(200).json({ result: rows });
     } catch (error) {

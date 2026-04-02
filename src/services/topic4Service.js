@@ -1,3 +1,4 @@
+const { env } = require("../config/env");
 const { ApiError } = require("../utils/apiError");
 
 const assertSafeIdentifier = (identifier) => {
@@ -30,16 +31,21 @@ const mapPostgresError = (error, tableName) => {
   throw error;
 };
 
-const getTopic4History = async (pool, source) => {
+const getTopic4History = async (pool, source, pagination) => {
   if (!pool) {
     throw new ApiError(500, "Database belum dikonfigurasi untuk endpoint ini.");
   }
 
   const tableName = getTableBySource(source);
+  const limit = pagination?.limit ?? env.topic4.defaultLimit;
+  const offset = pagination?.offset ?? env.topic4.defaultOffset;
 
   let rows;
   try {
-    const result = await pool.query(`SELECT * FROM ${tableName} ORDER BY timestamp DESC`);
+    const result = await pool.query(
+      `SELECT * FROM ${tableName} ORDER BY timestamp DESC LIMIT $1 OFFSET $2`,
+      [limit, offset]
+    );
     rows = result.rows;
   } catch (error) {
     mapPostgresError(error, tableName);
